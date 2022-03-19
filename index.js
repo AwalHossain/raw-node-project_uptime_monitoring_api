@@ -1,58 +1,50 @@
-// commen
-
 // dependencies
-const http = require("http");
-const url = require('url')
-const {StringDecoder} = require("string_decoder")
+const http = require('http');
+const { handleReqRes } = require('./helpers/hanldeReqRes');
+const environment = require('./helpers/environments')
+const data = require("./lib/data")
+
 
 // app object - module scaffolding
 const app = {};
 
 // configuration
 
-app.config = {
-  port: 3000,
-};
+// data create in file 
 
-// Create server
+// data.create('test', 'newFile', {"name": "Shishir", "Language": "Bengali", "hometown":"Sylhet"}, (err)=>{
+//     console.log(`error was`, err);
+// })
+
+// read file 
+
+// data.read('test', 'newFile', (err, data)=>{
+//     console.log(err, data)
+// } )
+
+
+// update file
+// data.update('test', 'newFile',{"name": "India", "lang":"Hindi"}, (err, data)=>{
+//     console.log(err, data);
+// })
+
+// data.update('test', )
+
+// data.delete('test', 'newFile', (err)=>{
+//     console.log(err);
+// })
+
+// create server
 app.createServer = () => {
-  const server = http.createServer(app.handleReqRes);
-  server.listen(app.config.port, () => {
-    console.log(`listening to port ${app.config.port}`);
-  });
+    const server = http.createServer(app.handleReqRes);
+    console.log(environment);
+    server.listen(environment.port, () => {
+        console.log(`listening to port ${environment.port}`);
+    });
 };
 
-// handle request response
-app.handleReqRes = (req, res) => {
-  // response handle
-    // get the url and parse it
-    const parsedUrl = url.parse(req.url, true)
-    const path = parsedUrl.pathname;
-    const trimmedPath = path.replace(/^\/+|\/+$/g, '');
-    const method = req.method.toLowerCase();
-    const queryStringObject = parsedUrl.query;
-    const headersObject = req.headers;
-    const decoder = new StringDecoder('utf-8')
-    let realData = '';
+// handle Request Response
+app.handleReqRes = handleReqRes;
 
-    req.on('data', (buffer)=>{
-        realData += decoder.write(buffer)
-    })
-
-
-
-    req.on('end', ()=>{
-        realData += decoder.end();
-
-        console.log(realData);
-            // response handle
-    res.end("hello wordl")
-    })
-
-
-
-
-};
-
-// Start the server
+// start the server
 app.createServer();
