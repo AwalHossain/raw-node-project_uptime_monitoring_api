@@ -1,8 +1,8 @@
 /*
  * Title: User Handler
  * Description: Handler to handle user related routes
- * Author: Sumit Saha ( Learn with Sumit )
- * Date: 11/21/2020
+ * Author: Awal 
+ * Date: 15/03/22
  *
  */
 // dependencies
@@ -104,7 +104,7 @@ handler._users.get = (requestProperties, callback) => {
         ? requestProperties.headersObject.token
         : false;
 
-tokenHandler.token.verify(token, phone, (tokenId) => {
+tokenHandler._token.verify(token, phone, (tokenId) => {
     if (tokenId) {
         // lookup the user
         data.read('users', phone, (err, u) => {
@@ -163,7 +163,7 @@ handler._users.put = (requestProperties, callback) => {
         ? requestProperties.headersObject.token
         : false;
 
-tokenHandler.token.verify(token, phone, (tokenId) => {
+tokenHandler._token.verify(token, phone, (tokenId) => {
     if (tokenId) {
         // lookup the user
         data.read('users', phone, (err1, udata) => {
@@ -234,7 +234,7 @@ handler._users.delete = (requestProperties, callback) => {
               ? requestProperties.headersObject.token
               : false;
 
-      tokenHandler.token.verify(token, phone, (tokenId) => {
+      tokenHandler._token.verify(token, phone, (tokenId) => {
           if (tokenId) {
               // lookup the user
               data.read('users', phone, (err1, userData) => {
@@ -274,4 +274,3 @@ module.exports = handler;
 
 
 
-module.exports = handler

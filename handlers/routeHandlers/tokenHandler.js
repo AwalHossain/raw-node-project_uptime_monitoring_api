@@ -16,15 +16,15 @@ const handler = {};
 handler.tokenHandler = (requestProperties, callback) => {
     const acceptMethods = ['get', 'post', 'put', 'delete'];
     if (acceptMethods.indexOf(requestProperties.method) > -1) {
-        handler.token[requestProperties.method](requestProperties, callback)
+        handler._token[requestProperties.method](requestProperties, callback)
     } else {
         callback(405)
     }
 }
 
-handler.token = {};
+handler._token = {};
 
-handler.token.post = (requestProperties, callback) => {
+handler._token.post = (requestProperties, callback) => {
     const password =
         typeof requestProperties.body.password === 'string' &&
             requestProperties.body.password.trim().length > 0
@@ -79,7 +79,7 @@ handler.token.post = (requestProperties, callback) => {
 
 
 // Get the token and authenticate
-handler.token.get = (requestProperties, callback) => {
+handler._token.get = (requestProperties, callback) => {
     const id =
       typeof requestProperties.queryStringObject.id === 'string' &&
         requestProperties.queryStringObject.id.trim().length === 20
@@ -109,7 +109,7 @@ handler.token.get = (requestProperties, callback) => {
 
 // Refresh Token 
 
- handler.token.put = (requestProperties, callback)=>{
+ handler._token.put = (requestProperties, callback)=>{
 
     const id =
         typeof requestProperties.body.id === 'string' &&
@@ -151,7 +151,7 @@ handler.token.get = (requestProperties, callback) => {
 
 // Delete data 
 
-handler.token.delete =(requestProperties, callback)=>{
+handler._token.delete =(requestProperties, callback)=>{
     console.log("dele");
     const id =
     typeof requestProperties.queryStringObject.id === 'string' &&
@@ -183,7 +183,7 @@ handler.token.delete =(requestProperties, callback)=>{
 }
 
 
-handler.token.verify = (id, phone, callback) => {
+handler._token.verify = (id, phone, callback) => {
     data.read('token', id, (err, tokenData) => {
         console.log(tokenData);
         if (!err && tokenData) {
