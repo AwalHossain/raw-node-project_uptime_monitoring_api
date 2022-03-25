@@ -230,8 +230,99 @@ handler._check.put = (requestProperties, callback) => {
 
 }
 
-handler._check.get = (requestProperties, callback) => {
+handler._check.delete = (requestProperties, callback) => {
 
+    const id =
+    typeof requestProperties.queryStringObject.id === 'string' &&
+      requestProperties.queryStringObject.id.trim().length === 20
+      ? requestProperties.queryStringObject.id
+      : false;
+
+      if(id){
+        data.read('checks', id, (err, checkData)=>{
+            console.log(checkData);
+            if(!err && checkData){
+                const token =
+                typeof requestProperties.headersObject.token === 'string'
+                    ? requestProperties.headersObject.token
+                    : false
+
+                    tokenHandler._token.verify(token, parseJSON(checkData).userPhone, (tokenIsValid)=>{
+                        console.log(parseJSON(checkData).userPhone);
+                        if(tokenIsValid){
+                         
+                            // data delete 
+                            console.log("userObject");
+                            data.delete('checks', id, (err1)=>{
+                                // const userObject = parseJSON(checkData);
+                                if(!err1){
+                                    data.read('users',parseJSON(checkData).userPhone, (err2, userData)=>{
+                                        const userObject = parseJSON(userData);
+                                        if(!err && userData){
+                                    const userChecks = typeof userObject.checks === 'object' && userObject.checks instanceof Array ? userObject.checks : []
+
+                                    // remove the deleted check id from user's list of
+
+                                    const checkPosition = userChecks.indexOf(id)
+                                    console.log(userObject,"userchecks", id, "id");
+                                    if(checkPosition > -1){
+                                        userChecks.splice(checkPosition, 1)
+
+                                        userObject.checks = userChecks;
+                                        data.update('users', userObject.phone, userObject, (err4)=>{
+                                            if(!err4){
+                                                callback(200)
+                                            }else{
+                                                callback(400,{
+                                                    error:'there was a server side error'
+                                                })  
+                                            }
+                                        })
+                                    }else{
+                                        callback(400,{
+                                            error:'The id was not founded'
+                                        }) 
+                                    }
+
+                                        }else{
+                                            callback(400,{
+                                                error:'There was some error in your request'
+                                            })
+                                        }
+                                    } )
+                                }else{
+                                    callback(400,{
+                                        error:'There was some error in your request'
+                                    })  
+                                }
+                            })
+
+
+                        }else{
+                            callback(500,{
+                                error:'Authentication failure'
+                            })
+                        }
+                    } )
+
+            }else{
+                callback(400,{
+                    error:'There was some error in your request'
+                })
+            }
+        })
+      }else{
+          callback(500,{
+              error:'There was some error in your request'
+          })
+      }
+}
+
+
+
+
+
+handler._check.get = (requestProperties, callback) => {
     const id =
     typeof requestProperties.queryStringObject.id === 'string' &&
       requestProperties.queryStringObject.id.trim().length === 20
@@ -269,13 +360,6 @@ handler._check.get = (requestProperties, callback) => {
               error:'There was some error in your request'
           })
       }
-}
-
-
-
-
-
-handler._check.delete = (requestProperties, callback) => {
 
 };
 
