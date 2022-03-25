@@ -133,12 +133,144 @@ handler._check.post = (requestProperties, callback) => {
     }
 }
 handler._check.put = (requestProperties, callback) => {
+    const id =
+    typeof requestProperties.body.id === 'string' &&
+      requestProperties.body.id.trim().length === 20
+      ? requestProperties.body.id
+      : false;
+
+
+        let protocol = typeof (requestProperties.body.protocol) === 'string' && ['http', 'https'].indexOf(requestProperties.body.protocol) > -1 ? requestProperties.body.protocol : false
+
+        let url = typeof requestProperties.body.url === 'string' && requestProperties.body.url.trim().length > 0 ? requestProperties.body.url : false;
+    
+        let method = typeof requestProperties.body.method === 'string' && ['get', 'post', 'put', 'delete'].indexOf(requestProperties.body.method) > -1 ? requestProperties.body.method : false
+    
+        let successCodes = typeof requestProperties.body.successCodes === 'object' && requestProperties.body.successCodes instanceof Array ? requestProperties.body.successCodes : false;
+    
+        let timeoutSeconds = typeof requestProperties.body.timeoutSeconds === 'number' &&
+            requestProperties.body.timeoutSeconds % 1 === 0 &&
+            requestProperties.body.timeoutSeconds >= 1 &&
+            requestProperties.body.timeoutSeconds <= 5
+            ? requestProperties.body.timeoutSeconds
+            : false;
+    
+
+        if(id){
+
+            if(protocol || url || method || successCodes || timeoutSeconds){
+                console.log(protocol, url);
+                console.log("fiji from", "checkData");
+                data.read('checks', id, (err, checkData)=>{
+                    if(!err && checkData){
+                        const checkObject = parseJSON(checkData);
+
+                      
+
+                        const token =
+                        typeof requestProperties.headersObject.token === 'string'
+                        ? requestProperties.headersObject.token
+                        : false
+                
+                            tokenHandler._token.verify(token, checkObject.userPhone, (tokenIsValid)=>{
+                            if(tokenIsValid){
+
+                                if(protocol){
+                            checkObject.protocol = protocol
+                                }
+
+                                if(url){
+                                    checkObject.url = url
+                                }
+
+                                if(method){
+                                    checkObject.method = method
+                                }
+
+                                if(successCodes){
+                                    checkObject.successCodes = successCodes
+                                }
+
+                                if(timeoutSeconds){
+                                    checkData.timeoutSeconds = timeoutSeconds
+                                }
+
+                                // Store the checkObject
+
+                                data.update('checks', id, checkObject, (err2)=>{
+                                    if(!err){
+                                        callback(200)
+                                    }else{
+                                        callback(500,{
+                                            error: 'There was a server side error'
+                                        })
+                                    }
+                                })
+
+                            }else{
+                                callback(400,{
+                                    error:'Authentication error'
+                                })
+                            }
+                        } )
+                    }else{
+                        callback(400,{
+                            error:'There was some error in your request'
+                        }) 
+                    }
+                })
+            }
+
+      }else{
+          callback(500,{
+              error:'There was some error in your request'
+          })
+      }
+    
 
 }
 
 handler._check.get = (requestProperties, callback) => {
 
+    const id =
+    typeof requestProperties.queryStringObject.id === 'string' &&
+      requestProperties.queryStringObject.id.trim().length === 20
+      ? requestProperties.queryStringObject.id
+      : false;
+
+      if(id){
+        data.read('checks', id, (err, checkData)=>{
+            console.log(checkData);
+            if(!err && checkData){
+                const token =
+                typeof requestProperties.headersObject.token === 'string'
+                    ? requestProperties.headersObject.token
+                    : false
+
+                    tokenHandler._token.verify(token, parseJSON(checkData).userPhone, (tokenIsValid)=>{
+                        console.log(parseJSON(checkData).userPhone);
+                        if(tokenIsValid){
+                            callback(200, parseJSON(checkData))
+                        }else{
+                            callback(500,{
+                                error:'Authentication failure'
+                            })
+                        }
+                    } )
+
+            }else{
+                callback(400,{
+                    error:'There was some error in your request'
+                })
+            }
+        })
+      }else{
+          callback(500,{
+              error:'There was some error in your request'
+          })
+      }
 }
+
 
 
 
